@@ -1,52 +1,27 @@
-import { Component, OnInit } from '@angular/core';
-import { HubConnection } from '@aspnet/signalr';
-import * as signalR from '@aspnet/signalr';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { SignalrService } from '../service/signalr.service';
 
 @Component({
   selector: 'app-waiting-room',
   templateUrl: './waiting-room.component.html',
   styleUrls: ['./waiting-room.component.scss']
 })
-export class WaitingRoomComponent implements OnInit {
-  private hubConnection: HubConnection;
-//https://stackoverflow.com/questions/54297637/how-to-hook-up-signalr-with-an-angular-7-application
-  constructor() { }
+export class WaitingRoomComponent implements OnInit, OnDestroy {
+  userName = 'default user';
+
+  interval;
+
+  constructor(private service: SignalrService) { }
+
   public ngOnInit() {
-    this.hubConnection = new signalR.HubConnectionBuilder()
-      .withUrl("http://localhost:50930/pushNotification").build();
-
-    this.hubConnection.start().then(() => {
-      console.log("connection started");
-    }).catch(err => console.log(err));
-
-    this.hubConnection.onclose(() => {
-      debugger;
-      setTimeout(() => {
-        debugger;
-        this.hubConnection.start().then(() => {
-          debugger;
-          console.log("connection started");
-        }).catch(err => console.log(err));
-      }, 5000);
-    });
-
-    this.hubConnection.on("clientMethodName", (data) => {
-      debugger;
-      console.log(data);
-    });
-
-    this.hubConnection.on("WelcomeMethodName", (data) => {
-      debugger;
-      console.log(data);
-      this.hubConnection.invoke("GetDataFromClient", "user id", data).catch(err => console.log(err));
-    });
+    this.interval = setInterval(() =>{
+      this.service.userPing(this.userName);
+    }, 1000);
   }
 
-  public stopConnection() {
-    this.hubConnection.start().then(() => {
-      console.log("stopped");
-    }).catch(err => console.log(err));
+  ngOnDestroy(): void {
+    if (this.interval) {
+      clearInterval(this.interval);
+   }
   }
-
-
 }

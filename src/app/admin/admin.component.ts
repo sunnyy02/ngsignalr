@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { SignalrService } from '../service/signalr.service';
 
 @Component({
   selector: 'app-admin',
@@ -7,9 +8,10 @@ import { Component, OnInit } from '@angular/core';
 })
 export class AdminComponent implements OnInit {
 
-  constructor() { }
+  users$ = this.service.users$;
+  constructor(private service: SignalrService) { }
 
   ngOnInit() {
+    this.service.notifyAdmin();
   }
-
 }
